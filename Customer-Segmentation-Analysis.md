@@ -43,3 +43,87 @@ dim(raw)
 ```
 
     ## [1] 4362   89
+
+# Step 2: Exploratory Data Analysis
+
+Before selecting and cleaning our final segmentation variables, let’s
+take a closer look at the data set as a whole. The goal here is simply
+to understand what we’re working with — not to draw conclusions yet.
+
+We’ll check:
+
+- **Shape**. How many rows and columns the data set has  
+- **Data types**.whether each column is being read as text, numeric, or
+  something else, since survey data often comes in as character strings
+  even when it looks numeric
+- **Missing values** — which columns have gaps, and how much
+- **Duplicates**Whether any respondent rows are repeated
+
+Once we understand the shape of the data and where the gaps are, we’ll
+be ready to move into the actual clustering task: selecting our
+segmentation variables, cleaning them, and running k-means.
+
+``` r
+cat("Rows:", nrow(raw), " Columns:", ncol(raw), "\n")
+```
+
+    ## Rows: 4362  Columns: 89
+
+``` r
+dtypes <- sapply(raw, function(x) class(x)[1])
+table(dtypes)
+```
+
+    ## dtypes
+    ## character   numeric   POSIXct 
+    ##        86         1         2
+
+``` r
+missing_summary <- data.frame(
+  Column = names(raw),
+  Missing = colSums(is.na(raw)),
+  Missing_Pct = round(colMeans(is.na(raw))*100, 1)
+) |> arrange(desc(Missing_Pct))
+
+head(missing_summary)
+```
+
+    ##       Column Missing Missing_Pct
+    ## Q13a    Q13a    2958        67.8
+    ## Q14      Q14    2958        67.8
+    ## Q11_1  Q11_1    2474        56.7
+    ## Q11_2  Q11_2    2474        56.7
+    ## Q11_3  Q11_3    2474        56.7
+    ## Q11_4  Q11_4    2474        56.7
+
+``` r
+n_dupes <- sum(duplicated(raw))
+cat("Duplicate rows:", n_dupes, "\n")
+```
+
+    ## Duplicate rows: 0
+
+## What we found
+
+- **Shape**: 4,362 rows and 89 columns, matching the data set
+  description provided in the assignment.
+- **Data types**: 86 columns are character (text/categorical), 1 is
+  numeric, and 2 are date columns (survey start/end times tamps). This
+  is expected for survey data, where most responses are recorded as
+  category labels rather than raw numbers.
+- **Missing values**: Missingness is heavily concentrated rather than
+  random. The columns `Q13a` and `Q14` have the highest missing rate
+  (67.8%), which makes sense since these questions are only shown to
+  respondents who indicated they have children (`Q13`). A large block of
+  columns is missing at a rate around 52–57% (e.g. `Q11_1`–`Q11_4`,
+  `Q06`, `Q07_1`–`Q07_6`), consistent with survey branching and/or
+  respondent drop-off partway through the questionnaire, rather than
+  random gaps in an otherwise-complete response.
+- **Duplicates**: No duplicate rows were found in the data set.
+
+This tells us the data set is clean in terms of duplication, but that
+completeness varies significantly by question, meaning our segmentation
+variables will need to be chosen with this branching/drop-off pattern in
+mind, and any missing values handled by restricting to complete cases
+for the specific variables selected, rather than assuming missingness is
+random across the whole data set.
