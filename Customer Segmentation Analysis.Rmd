@@ -1,0 +1,30 @@
+---
+title: "Customer Segmentation Analysis"
+authors: "Elvis Boapeah, Prince Adu Poku, Jose A Martinez Morales"
+output: html_document
+date: "2026-07-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Introduction
+
+This notebook conducts a customer segmentation analysis on the `Purchasing_data.xlsx` data set, following the steps outlined in Part B of the assignment:
+
+1. Select segmentation variables
+2. Preprocess the data and run clustering in R
+3. Visualize the segments
+4. Interpret the segments and propose a marketing recommendation
+
+We'll build this up step by step, one chunk at a time.
+
+# Step 0: lad PAckages and Data
+
+```{r load-packages}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+```
