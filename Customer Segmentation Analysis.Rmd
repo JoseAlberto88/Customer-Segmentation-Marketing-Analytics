@@ -1,9 +1,10 @@
 ---
 title: "Customer Segmentation Analysis"
-authors: "Elvis Boapeah, Prince Adu Poku, Jose A Martinez Morales"
-output: html_document
+author: "Elvis Boapeah, Prince Adu Poku, Jose A Martinez Morales"
+output: github_document
 date: "2026-07-29"
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
