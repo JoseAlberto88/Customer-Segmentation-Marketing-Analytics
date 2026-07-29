@@ -44,7 +44,7 @@ dim(raw)
 
     ## [1] 4362   89
 
-# Step 2: Exploratory Data Analysis
+# Step 1: Exploratory Data Analysis
 
 Before selecting and cleaning our final segmentation variables, let’s
 take a closer look at the data set as a whole. The goal here is simply
@@ -341,3 +341,47 @@ knitr::kable(codebook %>% select(Category, Code, Question),
 | Demographics | D16 | About how much do you currently have in personal or household savings that could be used for emergency expenses? (Savings may include cash, funds in checking or savings accounts, or other assets that can be converted to cash within one day.) |
 
 Full Data Codebook
+
+# Step 3: Preparation for K-means clustering
+
+## Preparation for the K-means clustering
+
+Before we can run k-means clustering, our two selected variables (`Q03`
+(monthly credit card balance) and `D11` (annual income)), we need to go
+through several preparation steps. Right now they’re stored as text
+categories (e.g. `"Between $25,000 and $49,999"`), not numbers, and
+k-means can’t work directly with text.
+
+Here’s what we’re doing, and why each step matters:
+
+- **Trimming whitespace.** Survey exports (like this Qualtrics file)
+  sometimes have stray trailing spaces on category labels. Without
+  trimming, `"Two"` and `"Two "` would be treated as two *different*
+  categories instead of the same one, a subtle bug that’s easy to miss.
+
+- **Converting categories to numeric midpoints.** Since both variables
+  are reported as dollar *ranges* rather than exact amounts, we convert
+  each range to a single representative number (its midpoint) so that
+  k-means has actual numeric distances to work with. For example,
+  `"$501 to $1,000"` becomes `750`. The open-ended top categories
+  (`"More than $10,000"`, `"More than $100,000"`) don’t have a natural
+  midpoint, so we chose reasonable representative values. This is a
+  judgment call we’ll state explicitly as an assumption in our report.
+
+- **Filtering to complete cases.** Not every respondent answered both
+  `Q03` and `D11`. Many dropped off partway through the survey, which we
+  already saw in our exploratory analysis. Rather than guessing or
+  filling in missing values, we keep only the respondents who have
+  *both* variables present, so that every clustering input is a real,
+  complete observation.
+
+- **Standardizing (scaling) the variables.** `D11` (income) ranges up
+  into the hundreds of thousands, while `Q03` (balance) tops out around
+  \$12,000. If we clustered on the raw numbers, income would completely
+  dominate the distance calculation just because its numbers are bigger,
+  not because it’s actually more important. Standardizing puts both
+  variables on the same scale (mean 0, standard deviation 1) so they
+  contribute equally to the clustering.
+
+Once this is done, we’ll have a clean, numeric, standardized dataset of
+2,094 respondents, ready for k-means clustering.
