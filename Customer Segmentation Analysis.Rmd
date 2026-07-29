@@ -280,3 +280,7 @@ ggplot(df_complete, aes(x = income_num, y = balance_num)) +
        x = "Annual Income (USD, midpoint)", y = "Monthly Credit Card Balance (USD, midpoint)") +
   theme_minimal()
 ```
+
+
+
+
