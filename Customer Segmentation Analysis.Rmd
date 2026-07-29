@@ -281,6 +281,30 @@ ggplot(df_complete, aes(x = income_num, y = balance_num)) +
   theme_minimal()
 ```
 
+## What This Plot Tells Us, And What It Doesn't
+
+Looking at this raw scatter plot of income against credit card balance, we
+can see the data is spread across a grid-like pattern (a natural result of
+both variables being bucketed into ranges), with a noticeably large
+concentration of respondents in the lower-balance region across every income
+level, and a much smaller group of high-balance respondents scattered near
+the top.
+
+However, **it is not visually obvious from this plot alone how many distinct
+customer segments actually exist** in this data, or where the boundaries
+between them should be drawn. A few natural bands are visible (e.g. a dense
+low-balance band, and a sparser high-balance band), but whether these should
+be treated as 2 groups, 4 groups, or something else entirely isn't something
+we can determine just by eye.
+
+This is exactly the problem k-means clustering, combined with the elbow
+method and silhouette score, is designed to solve: it will let the data
+itself suggest a defensible number of segments (k), based on statistical
+criteria rather than a visual guess.
+
+We're now ready to move into that step: determining the appropriate value
+of k, and then fitting the k-means model to formally define the customer
+segments.
 
 
 
