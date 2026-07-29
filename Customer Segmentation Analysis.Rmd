@@ -105,3 +105,80 @@ variables will need to be chosen with this branching/drop-off pattern in
 mind, and any missing values handled by restricting to complete cases for
 the specific variables selected, rather than assuming missingness is random
 across the whole data set.
+
+
+## Why We're Building a Code book First
+
+The raw data set has 89 columns, but their names (`Q01_8`, `D11`, `C1`, etc.)
+are just short internal codes. They don't tell us anything on their own
+about what each question actually asked. Before we can responsibly choose
+segmentation variables or interpret any results, we need to understand what
+every column actually represents.
+
+Rather than looking up each column name individually as we go, we'll build
+a proper code book up front: a table that maps every short code to its full
+question text, and then groups related questions into categories (e.g.
+Payment Methods, Credit Card Usage, Demographics). This has a few benefits:
+
+- **It prevents mistakes.** It would be easy to confuse similarly-named
+  columns (e.g. `Q07_1` through `Q07_6`, or `D02` vs. `D03`) without a clear
+  reference for what each one means.
+  
+- **It reveals structure in the survey itself.** Grouping columns by
+  category makes it clear that this survey was built from multiple
+  sub-topics — payment behavior, credit card usage, BNPL attitudes, device
+  ownership, and demographics — which helps explain patterns we saw earlier,
+  like the block-wise missingness in our exploratory analysis.
+- **It documents our reasoning for the report.** When we justify our choice
+  of segmentation variables in Step 3, we can point directly to this
+  code book to show why `Q03` and `D11` were selected — not just that they
+  seemed reasonable, but that we understood the full landscape of
+  candidate variables and considered other options (e.g. credit score,
+  savings, device ownership) before making that choice.
+
+Once the code book is built, we'll use it to confirm exactly what our chosen
+segmentation variables measure, then move into cleaning and clustering.
+
+```{r codebook-build}
+labels_row <- read_excel("data/Purchasing_data.xlsx", sheet = "Sheet1",
+                          col_names = FALSE, skip = 1, n_max = 1)
+question_text <- as.character(unlist(labels_row[1, ]))
+
+codebook <- data.frame(Code = codes, Question = question_text, stringsAsFactors = FALSE)
+
+head(codebook, 10)
+```
+```{r codebook-categories}
+category_map <- list(
+  "Payment Methods (12mo)"    = c("Q01_1","Q01_2","Q01_3","Q01_4","Q01_5","Q01_6","Q01_7",
+                                    "Q01_8","Q01_9","Q01_10","Q01_11","Q01_12","Q01_13","Q01_14","Q01_15"),
+  "Credit Card Usage"         = c("Q02","Q03","Q04","Q05","Q06"),
+  "Credit Card Purchase Type" = c("Q07_1","Q07_2","Q07_3","Q07_4","Q07_5","Q07_6"),
+  "BNPL Behavior"             = c("Q10","Q11_1","Q11_2","Q11_3","Q11_4"),
+  "Card Choice Importance"    = c("Q12_1","Q12_2","Q12_3","Q12_4","Q12_5","Q12_6","Q12_7","Q12_8","Q12_9"),
+  "Children & Credit"         = c("Q13","Q13a","Q14"),
+  "Credit Score"              = c("C1"),
+  "Device Ownership"          = c("D01_1","D01_4","D01_5","D01_6","D01_7","D01_8","D01_9","D01_10","D01_11","D01_12"),
+  "In-Store Payment Methods"  = c("D02_1","D02_4","D02_5","D02_6","D02_7","D02_8","D02_9","D02_10","D02_11","D02_12","D02_13","D02_14"),
+  "Online Payment Methods"    = c("D03_1","D03_4","D03_5","D03_6","D03_7","D03_8","D03_9","D03_10"),
+  "Subscriptions"             = c("D04_1","D04_2"),
+  "Demographics"              = c("D06","D07","D08","D09","D10","D11","D12","D13","D14","D15","D16"),
+  "Survey Metadata"           = c("Q1","End Date")
+)
+```
+
+```{r codebook-join}
+code_to_category <- stack(category_map) %>% rename(Code = values, Category = ind)
+
+codebook <- codebook %>%
+  left_join(code_to_category, by = "Code") %>%
+  mutate(Category = ifelse(is.na(Category), "Uncategorized", as.character(Category)))
+```
+
+```{r codebook-counts}
+codebook %>% count(Category, sort = TRUE)
+```
+```{r codebook-full-table}
+knitr::kable(codebook %>% select(Category, Code, Question), 
+             caption = "Full Data Codebook")
+```
