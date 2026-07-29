@@ -385,3 +385,111 @@ Here’s what we’re doing, and why each step matters:
 
 Once this is done, we’ll have a clean, numeric, standardized dataset of
 2,094 respondents, ready for k-means clustering.
+
+``` r
+df <- raw %>%
+  select(Q03, D11) %>%
+  mutate(Q03 = trimws(Q03), D11 = trimws(D11))
+
+table(df$Q03, useNA = "always")
+```
+
+    ## 
+    ##  $1,001 to $2,000  $2,001 to $3,000  $3,001 to $4,000  $4,001 to $5,000 
+    ##               321               285               148               129 
+    ##  $5,001 to $7,000    $501 to $1,000 $7,001 to $10,000    Less than $500 
+    ##               132               348               103               486 
+    ## More than $10,000              Zero              <NA> 
+    ##               181               555              1674
+
+``` r
+balance_map <- c(
+  "Zero" = 0, "Less than $500" = 250, "$501 to $1,000" = 750,
+  "$1,001 to $2,000" = 1500, "$2,001 to $3,000" = 2500, "$3,001 to $4,000" = 3500,
+  "$4,001 to $5,000" = 4500, "$5,001 to $7,000" = 6000, "$7,001 to $10,000" = 8500,
+  "More than $10,000" = 12000
+)
+
+income_map <- c(
+  "Below $25,000" = 12500, "Between $25,000 and $49,999" = 37500,
+  "Between $50,000 and $74,999" = 62500, "Between $75,000 and $99,999" = 87500,
+  "More than $100,000" = 125000
+)
+
+df <- df %>%
+  mutate(balance_num = balance_map[Q03], income_num = income_map[D11])
+
+head(df, 10)
+```
+
+    ## # A tibble: 10 × 4
+    ##    Q03              D11                         balance_num income_num
+    ##    <chr>            <chr>                             <dbl>      <dbl>
+    ##  1 $1,001 to $2,000 Between $25,000 and $49,999        1500      37500
+    ##  2 Less than $500   More than $100,000                  250     125000
+    ##  3 $5,001 to $7,000 Between $75,000 and $99,999        6000      87500
+    ##  4 $1,001 to $2,000 Below $25,000                      1500      12500
+    ##  5 $501 to $1,000   More than $100,000                  750     125000
+    ##  6 Less than $500   Below $25,000                       250      12500
+    ##  7 $501 to $1,000   Below $25,000                       750      12500
+    ##  8 $2,001 to $3,000 Below $25,000                      2500      12500
+    ##  9 $2,001 to $3,000 Below $25,000                      2500      12500
+    ## 10 $2,001 to $3,000 Below $25,000                      2500      12500
+
+``` r
+df_complete <- df %>% filter(!is.na(balance_num), !is.na(income_num))
+
+cat("Complete cases:", nrow(df_complete), "of", nrow(df), "\n")
+```
+
+    ## Complete cases: 2094 of 4362
+
+``` r
+# K-means requires numeric, complete (no NA) input
+sapply(df_complete |> select(balance_num, income_num), class)
+```
+
+    ## balance_num  income_num 
+    ##   "numeric"   "numeric"
+
+``` r
+colSums(is.na(df_complete |> select(balance_num, income_num)))
+```
+
+    ## balance_num  income_num 
+    ##           0           0
+
+``` r
+summary(df_complete %>% select(balance_num, income_num))
+```
+
+    ##   balance_num      income_num    
+    ##  Min.   :  250   Min.   : 12500  
+    ##  1st Qu.:  750   1st Qu.: 37500  
+    ##  Median : 1500   Median : 62500  
+    ##  Mean   : 3046   Mean   : 73000  
+    ##  3rd Qu.: 4500   3rd Qu.:125000  
+    ##  Max.   :12000   Max.   :125000
+
+``` r
+sapply(df_complete %>% select(balance_num, income_num), sd)
+```
+
+    ## balance_num  income_num 
+    ##    3437.641   39580.757
+
+``` r
+cor(df_complete$balance_num, df_complete$income_num)
+```
+
+    ## [1] 0.2491494
+
+``` r
+ggplot(df_complete, aes(x = income_num, y = balance_num)) +
+  geom_jitter(alpha = 0.4, width = 3000, height = 200, color = "darkorange") +
+  labs(title = "Monthly Credit Card Balance vs. Annual Income",
+       x = "Annual Income (USD, midpoint)", y = "Monthly Credit Card Balance (USD, midpoint)") +
+  theme_minimal()
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/pre-cluster-scatter-1.png)<!-- -->
