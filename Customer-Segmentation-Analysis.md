@@ -717,6 +717,46 @@ ggplot(df_complete, aes(x = cluster, y = balance_num, fill = cluster)) +
 
 ![](Customer-Segmentation-Analysis_files/figure-gfm/segment-boxplot-1.png)<!-- -->
 
+**Scatter plot with centroids overlaid**
+
+``` r
+# Cluster centers come out in standardized (scaled) units, so we convert them
+# back to original dollar values to plot them on the same axes as the real data
+center_scaled <- as.data.frame(km_final$centers)
+scale_center <- attr(X_scaled, "scaled:center")
+scale_scale  <- attr(X_scaled, "scaled:scale")
+
+centers_original <- data.frame(
+  cluster = factor(1:4),
+  balance_num = center_scaled$balance_num * scale_scale["balance_num"] + scale_center["balance_num"],
+  income_num  = center_scaled$income_num  * scale_scale["income_num"]  + scale_center["income_num"]
+)
+
+centers_original
+```
+
+    ##   cluster balance_num income_num
+    ## 1       1    1314.441   27639.75
+    ## 2       2    2085.592   73412.98
+    ## 3       3   10714.545   88545.45
+    ## 4       4    2368.143  125000.00
+
+**Visualize it**
+
+``` r
+ggplot(df_complete, aes(x = income_num, y = balance_num, color = cluster)) +
+  geom_jitter(alpha = 0.35, width = 3000, height = 200, size = 1.6) +
+  geom_point(data = centers_original, aes(x = income_num, y = balance_num),
+             color = "black", shape = 8, size = 5, stroke = 1.5) +
+  labs(title = "Customer Segments with Cluster Centroids",
+       subtitle = "Black stars mark the centroid (center) of each segment",
+       x = "Annual Income (USD, midpoint)", y = "Monthly Credit Card Balance (USD, midpoint)",
+       color = "Segment") +
+  theme_minimal()
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/centroids-plot-1.png)<!-- -->
+
 ## Why k = 4, and What It Reveals
 
 We selected **k = 4** primarily using the elbow method: the improvement
@@ -850,3 +890,66 @@ affect how representative these segments are of the full customer base.
 Future work could expand this segmentation with additional variables
 (e.g. savings, financial lifestyle, device ownership) to build richer,
 more nuanced customer profiles.
+
+# Step 1 (Review): Why We Selected Q03 and D11
+
+## The Decision
+
+We selected two financial variables for segmentation:
+
+- **`Q03`** – Monthly credit card balance (a *behavioral* variable: what
+  customers actually do)
+- **`D11`** – Annual income (a *demographic/capacity* variable: what
+  customers are financially able to do)
+
+## How We Got There
+
+Before choosing these two, we built a full codebook of all 89 survey
+columns and grouped them into 13 categories (Payment Methods, Credit
+Card Usage, BNPL Behavior, Card Choice Importance, Device Ownership,
+Demographics, etc.). This gave us visibility into the full landscape of
+candidate variables – credit score, savings, financial lifestyle, device
+ownership, payment method diversity, and more – rather than picking the
+first two variables that seemed reasonable.
+
+We narrowed to `Q03` and `D11` for three concrete reasons:
+
+**1. Data quality and completeness.** Both variables came from the same
+“later” block of the survey (the point where roughly half of respondents
+had dropped off), giving us exactly the same 2,094 complete-case
+respondents for both – no additional data loss from combining variables
+with different missingness patterns. We confirmed this directly: `Q03`
+and `D11` had identical overlap (2,094 of 2,094 cases matched exactly),
+meaning pairing them didn’t cost us any extra sample size beyond what
+either variable required on its own.
+
+**2. Behavioral variable + capacity variable, not two of the same
+thing.** Rather than choosing two variables that likely measure the same
+underlying concept (e.g. income and savings, which tend to move
+together), we deliberately paired a *behavior* variable (what a customer
+actually spends via credit card) with a *capacity* variable (what a
+customer earns). We confirmed this distinction empirically: the
+correlation between `Q03` and `D11` was only **0.25** – weak enough to
+show they capture genuinely different information, not so weak that
+they’re unrelated. This is exactly the situation where clustering on
+both together adds value beyond either variable alone: two customers
+with similar income can still land in very different segments based on
+their actual balance behavior (as we saw with Segments 3 and 4).
+
+**3. Direct relevance to marketing goals.** Both variables map cleanly
+onto standard financial-services marketing questions: *who has money*
+(income) and *who is actively using credit* (balance). Combined, they
+let a business distinguish, for example, a high-income customer who
+revolves a large balance (a strong candidate for a rewards or
+balance-transfer offer) from a similarly high-income customer who
+carries almost no balance (better suited to a different kind of product
+messaging entirely) – a distinction income alone could never reveal.
+
+## What We Considered and Set Aside
+
+Other candidates from the codebook – credit score (`C1`), savings
+(`D16`), and self-reported financial lifestyle (`D15`) – were reasonable
+alternatives, but `Q03` and `D11` were prioritized because they offered
+the clearest behavior-vs-capacity contrast with no added missing-data
+cost, and the most direct, easily explainable link to a marketing
+action.
