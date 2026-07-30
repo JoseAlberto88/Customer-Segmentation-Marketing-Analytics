@@ -431,3 +431,134 @@ ggplot(df_complete, aes(x = cluster, y = balance_num, fill = cluster)) +
   theme_minimal() + theme(legend.position = "none")
 ```
 
+## Why k = 4, and What It Reveals
+
+We selected **k = 4** primarily using the elbow method: the improvement in
+within-cluster sum of squares dropped sharply after k=3-4 (from roughly
+-1,180 down to -289), with only small, diminishing gains beyond that point.
+While the silhouette score technically peaked around k=9-10, we did not
+follow that signal, with only two coarse ordinal variables (10 and 5
+possible values), many respondents share identical coordinates, which
+artificially inflates silhouette scores at high k by carving out many tiny,
+"perfectly tight" clusters. That pattern reflects a quirk of the data's
+resolution, not four, nine, or ten genuine customer archetypes. k = 4 was
+chosen because it sits at the natural elbow bend *and* produces segments
+that are large enough, distinct enough, and interpretable enough to act on.
+
+The four resulting segments are:
+
+| Segment | n | Mean Balance | Mean Income | Profile |
+|---|---|---|---|---|
+| 1 | 644 | $1,314 | $27,640 | Low income, low balance |
+| 2 | 701 | $2,086 | $73,413 | Middle income, moderate balance |
+| 3 | 275 | $10,715 | $88,545 | High income, very high balance (tight, homogeneous group) |
+| 4 | 474 | $2,368 | $125,000 | Highest income, low balance |
+
+The most striking insight is the contrast between **Segment 3 and Segment
+4**: both have relatively high income (roughly $88K-$125K), yet Segment 3
+carries a dramatically higher credit card balance than Segment 4. This
+shows that **income alone does not predict credit card spending or
+revolving behavior**, two customers who look financially similar on paper
+can behave in very different ways. Segment 3 also stands out as unusually
+homogeneous (as shown in the boxplot diagnostic above), meaning nearly
+every respondent in that group carries a similarly high balance, rather
+than the finding being driven by a few extreme outliers.
+
+This distinction is directly useful for marketing: Segment 3 represents
+financially capable customers who are already heavy users of credit,
+making them strong candidates for premium rewards or cashback products,
+while Segment 4, equally high-income but low-balance, may represent
+customers who prefer to pay in full or avoid revolving credit, suggesting
+a different marketing angle focused on convenience, travel perks, or
+low-fee premium cards rather than credit-driven rewards.
+
+# Step 7: Segment Interpretation and Marketing Recommendation
+
+## Segment Profiles
+
+**Segment 1 -- "Budget-Constrained" (n = 644, 31% of the sample)**
+Average annual income of roughly $27,600 and the lowest average credit card
+balance ($1,314) among all segments. This group also shows the widest
+internal spread in balance (from $250 up to occasional outliers near
+$6,000), suggesting that while most members carry minimal balances,
+a small number carry proportionally heavy debt relative to their income.
+
+**Segment 2 -- "Mainstream Middle" (n = 701, 33% of the sample, the largest
+segment)**
+Average income of about $73,400 with a moderate average balance of $2,086.
+This is the most "typical" segment in the sample -- middle income, moderate
+credit card usage, without extreme values in either direction.
+
+**Segment 3 -- "High-Balance Revolvers" (n = 275, 13% of the sample, the
+smallest segment)**
+Average income of about $88,500, but by far the highest average balance
+($10,715). This segment is also unusually homogeneous: nearly every member
+falls into just two balance brackets ($8,500 or $12,000), meaning this
+isn't a small number of outliers skewing the average -- it's a genuinely
+consistent pattern of heavy credit card usage across the whole segment.
+
+**Segment 4 -- "Affluent Low-Utilizers" (n = 474, 23% of the sample)**
+The highest average income in the sample ($125,000), yet a low average
+balance ($2,368) -- similar to Segment 2's balance level despite having the
+highest income of any segment.
+
+## Key Pattern: Income Does Not Predict Balance
+
+The clearest insight from this segmentation is the contrast between
+**Segment 3 and Segment 4**. Both groups have comparably high income
+(roughly $88K-$125K), yet Segment 3's average balance is more than four
+times higher than Segment 4's. If income were the main driver of credit
+card balance, we would expect these two groups to look similar -- instead,
+they represent two fundamentally different financial behaviors within the
+same income bracket: one group actively carries and likely revolves
+significant credit card debt, while the other appears to pay down balances
+quickly or simply uses credit cards more conservatively.
+
+This means that **income alone is not a reliable segmentation variable on
+its own** for a business trying to target credit-related products --
+a customer's actual balance behavior reveals something income can't.
+
+## Marketing Recommendation
+
+**Target Segment 3 ("High-Balance Revolvers") with a balance-transfer or
+low-interest rewards card offer.**
+
+This segment combines two conditions that make it highly actionable:
+relatively high income (so members are not necessarily financially
+distressed, unlike Segment 1) paired with consistently high credit card
+balances (unlike Segments 2 and 4). This combination suggests customers who
+are actively and repeatedly using credit as part of their normal spending
+pattern, rather than occasionally carrying a small balance.
+
+**Recommended approach:**
+- **Product angle:** A low-introductory-APR balance transfer card, or a
+  cashback/rewards card with strong ongoing value on everyday categories
+  (groceries, gas, dining), since this segment is clearly comfortable using
+  credit cards heavily.
+- **Messaging:** Emphasize value capture on spending they're already doing
+  ("earn more on what you already spend") rather than debt-reduction
+  messaging, since this group's high income suggests the balance may
+  reflect spending preference rather than financial hardship.
+- **Channel:** Given this segment's demonstrated comfort with revolving
+  credit, targeted digital ads and email offers highlighting rewards rate
+  or a limited-time 0% APR balance transfer window are likely to perform
+  well.
+
+By contrast, **Segment 1** (low income, low balance, but with some
+high-relative-debt outliers) would be a poor fit for a similar rewards-card
+push -- that segment may be better served by budgeting tools, secured
+credit-building products, or lower-fee options, which is a natural area for
+future analysis beyond the scope of this project.
+
+## Limitations
+
+This segmentation is based on only two variables (`Q03` and `D11`), both
+converted from ordinal survey categories to numeric midpoints -- a
+reasonable but imperfect approximation of true dollar values, particularly
+for the open-ended top brackets ("More than $10,000" and "More than
+$100,000"). Additionally, the analysis is limited to the 2,094 respondents
+(48%) who completed this portion of the survey; the excluded 52% may differ
+systematically from those included, which could affect how representative
+these segments are of the full customer base. Future work could expand this
+segmentation with additional variables (e.g. savings, financial lifestyle,
+device ownership) to build richer, more nuanced customer profiles.
