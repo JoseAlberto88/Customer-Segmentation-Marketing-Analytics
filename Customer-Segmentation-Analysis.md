@@ -518,3 +518,119 @@ criteria rather than a visual guess.
 We’re now ready to move into that step: determining the appropriate
 value of k, and then fitting the k-means model to formally define the
 customer segments.
+
+# Step 4: Constructing the K-Means and find the best k-value
+
+**Standardize the variables** It is needed before clustering, since
+income and balance are on very different scales
+
+``` r
+X_scaled <- scale(df_complete |> select(balance_num, income_num))
+
+head(X_scaled)
+```
+
+    ##      balance_num income_num
+    ## [1,]  -0.4496125 -0.8969065
+    ## [2,]  -0.8132339  1.3137637
+    ## [3,]   0.8594246  0.3663336
+    ## [4,]  -0.4496125 -1.5285266
+    ## [5,]  -0.6677854  1.3137637
+    ## [6,]  -0.8132339 -1.5285266
+
+**Elbow method**
+
+``` r
+set.seed(42)
+k_range <- 1:10
+wss <- sapply(k_range, function(k) {
+  kmeans(X_scaled, centers = k, nstart = 10)$tot.withinss
+})
+
+elbow_df <- data.frame(k = k_range, wss = wss)
+
+ggplot(elbow_df, aes(x = k, y = wss)) +
+  geom_line() + geom_point(size = 2) +
+  scale_x_continuous(breaks = k_range) +
+  labs(title = "Elbow Method for Optimal k",
+       x = "Number of Clusters (k)", y = "Within-Cluster Sum of Squares") +
+  theme_minimal()
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/elbow-method-1.png)<!-- -->
+
+**Silhouette score**
+
+``` r
+set.seed(42)
+sil_range <- 2:10
+sil_scores <- sapply(sil_range, function(k) {
+  km <- kmeans(X_scaled, centers = k, nstart = 10)
+  mean(silhouette(km$cluster, dist(X_scaled))[, 3])
+})
+
+sil_df <- data.frame(k = sil_range, sil = sil_scores)
+
+ggplot(sil_df, aes(x = k, y = sil)) +
+  geom_line(color = "darkgreen") + geom_point(size = 2, color = "darkgreen") +
+  scale_x_continuous(breaks = sil_range) +
+  labs(title = "Silhouette Score by k",
+       x = "Number of Clusters (k)", y = "Average Silhouette Width") +
+  theme_minimal()
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/silhouette-method-1.png)<!-- -->
+
+``` r
+sil_df
+```
+
+    ##    k       sil
+    ## 1  2 0.4473913
+    ## 2  3 0.5206755
+    ## 3  4 0.4863002
+    ## 4  5 0.4966504
+    ## 5  6 0.5071919
+    ## 6  7 0.5086997
+    ## 7  8 0.5362761
+    ## 8  9 0.5305577
+    ## 9 10 0.5740086
+
+**Decide on k, with reasoning documented**
+
+``` r
+cat("Silhouette peaks at k =", sil_df$k[which.max(sil_df$sil)],
+    "-- but this is inflated by ties, since both variables are coarse\n",
+    "ordinal buckets (only 10 and 5 possible values). Many respondents share\n",
+    "identical coordinates, letting k-means carve out many small, artificially\n",
+    "'tight' clusters at high k. This is not a genuine signal of 9-10 real\n",
+    "marketing segments.\n\n")
+```
+
+    ## Silhouette peaks at k = 10 -- but this is inflated by ties, since both variables are coarse
+    ##  ordinal buckets (only 10 and 5 possible values). Many respondents share
+    ##  identical coordinates, letting k-means carve out many small, artificially
+    ##  'tight' clusters at high k. This is not a genuine signal of 9-10 real
+    ##  marketing segments.
+
+``` r
+cat("WSS improvement per additional cluster:\n")
+```
+
+    ## WSS improvement per additional cluster:
+
+``` r
+print(round(diff(wss), 1))
+```
+
+    ## [1] -1842.8 -1180.1  -288.5  -208.9  -142.7   -94.7   -59.6   -39.5   -39.0
+
+``` r
+cat("\nThe elbow method shows WSS improvement drops sharply after k=3-4",
+    "(from ~1,180 down to ~289), with only small, diminishing gains after that.",
+    "k = 4 is selected: it sits at the elbow bend and produces segments that",
+    "remain interpretable and actionable for marketing purposes.\n")
+```
+
+    ## 
+    ## The elbow method shows WSS improvement drops sharply after k=3-4 (from ~1,180 down to ~289), with only small, diminishing gains after that. k = 4 is selected: it sits at the elbow bend and produces segments that remain interpretable and actionable for marketing purposes.
