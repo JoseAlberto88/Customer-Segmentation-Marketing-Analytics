@@ -476,30 +476,30 @@ low-fee premium cards rather than credit-driven rewards.
 
 ## Segment Profiles
 
-**Segment 1 -- "Budget-Constrained" (n = 644, 31% of the sample)**
+**Segment 1 "Budget-Constrained" (n = 644, 31% of the sample)**
 Average annual income of roughly $27,600 and the lowest average credit card
 balance ($1,314) among all segments. This group also shows the widest
 internal spread in balance (from $250 up to occasional outliers near
 $6,000), suggesting that while most members carry minimal balances,
 a small number carry proportionally heavy debt relative to their income.
 
-**Segment 2 -- "Mainstream Middle" (n = 701, 33% of the sample, the largest
+**Segment 2 "Mainstream Middle" (n = 701, 33% of the sample, the largest
 segment)**
 Average income of about $73,400 with a moderate average balance of $2,086.
-This is the most "typical" segment in the sample -- middle income, moderate
+This is the most "typical" segment in the sample, middle income, moderate
 credit card usage, without extreme values in either direction.
 
-**Segment 3 -- "High-Balance Revolvers" (n = 275, 13% of the sample, the
+**Segment 3 "High-Balance Revolvers" (n = 275, 13% of the sample, the
 smallest segment)**
 Average income of about $88,500, but by far the highest average balance
 ($10,715). This segment is also unusually homogeneous: nearly every member
 falls into just two balance brackets ($8,500 or $12,000), meaning this
-isn't a small number of outliers skewing the average -- it's a genuinely
+isn't a small number of outliers skewing the average, it's a genuinely
 consistent pattern of heavy credit card usage across the whole segment.
 
-**Segment 4 -- "Affluent Low-Utilizers" (n = 474, 23% of the sample)**
+**Segment 4 "Affluent Low-Utilizers" (n = 474, 23% of the sample)**
 The highest average income in the sample ($125,000), yet a low average
-balance ($2,368) -- similar to Segment 2's balance level despite having the
+balance ($2,368), similar to Segment 2's balance level despite having the
 highest income of any segment.
 
 ## Key Pattern: Income Does Not Predict Balance
@@ -508,14 +508,14 @@ The clearest insight from this segmentation is the contrast between
 **Segment 3 and Segment 4**. Both groups have comparably high income
 (roughly $88K-$125K), yet Segment 3's average balance is more than four
 times higher than Segment 4's. If income were the main driver of credit
-card balance, we would expect these two groups to look similar -- instead,
+card balance, we would expect these two groups to look similar, instead,
 they represent two fundamentally different financial behaviors within the
 same income bracket: one group actively carries and likely revolves
 significant credit card debt, while the other appears to pay down balances
 quickly or simply uses credit cards more conservatively.
 
 This means that **income alone is not a reliable segmentation variable on
-its own** for a business trying to target credit-related products --
+its own** for a business trying to target credit-related products,
 a customer's actual balance behavior reveals something income can't.
 
 ## Marketing Recommendation
@@ -553,7 +553,7 @@ future analysis beyond the scope of this project.
 ## Limitations
 
 This segmentation is based on only two variables (`Q03` and `D11`), both
-converted from ordinal survey categories to numeric midpoints -- a
+converted from ordinal survey categories to numeric midpoints, a
 reasonable but imperfect approximation of true dollar values, particularly
 for the open-ended top brackets ("More than $10,000" and "More than
 $100,000"). Additionally, the analysis is limited to the 2,094 respondents
