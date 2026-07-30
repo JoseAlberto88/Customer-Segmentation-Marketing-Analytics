@@ -680,3 +680,39 @@ df_complete %>%
     ## 4 4         474        2368.     125000
 
 # Step 6: Visualize the Segments
+
+**Scatter plot colored by segment**
+
+``` r
+ggplot(df_complete, aes(x = income_num, y = balance_num, color = cluster)) +
+  geom_jitter(alpha = 0.5, width = 3000, height = 200, size = 1.8) +
+  labs(title = "Customer Segments: Income vs. Credit Card Balance",
+       x = "Annual Income (USD, midpoint)", y = "Monthly Credit Card Balance (USD, midpoint)",
+       color = "Segment") +
+  theme_minimal()
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/segment-scatter-1.png)<!-- -->
+
+**Bar chart of segment sizes**
+
+``` r
+ggplot(df_complete, aes(x = cluster, fill = cluster)) +
+  geom_bar() +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.4) +
+  labs(title = "Segment Sizes", x = "Segment", y = "Number of Respondents") +
+  theme_minimal() + theme(legend.position = "none")
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/segment-sizes-1.png)<!-- -->
+
+**Boxplot comparing balance across segments**
+
+``` r
+ggplot(df_complete, aes(x = cluster, y = balance_num, fill = cluster)) +
+  geom_boxplot() +
+  labs(title = "Credit Card Balance by Segment", x = "Segment", y = "Monthly Balance (USD, midpoint)") +
+  theme_minimal() + theme(legend.position = "none")
+```
+
+![](Customer-Segmentation-Analysis_files/figure-gfm/segment-boxplot-1.png)<!-- -->
