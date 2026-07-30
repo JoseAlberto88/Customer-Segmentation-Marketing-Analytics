@@ -373,3 +373,31 @@ cat("\nThe elbow method shows WSS improvement drops sharply after k=3-4",
     "k = 4 is selected: it sits at the elbow bend and produces segments that",
     "remain interpretable and actionable for marketing purposes.\n")
 ```
+
+# Step 5: Fit the k-Means model
+
+**Fit the final model**
+
+```{r fit-kmeans}
+set.seed(42)
+final_k <- 4
+
+km_final <- kmeans(X_scaled, centers = final_k, nstart = 25)
+df_complete$cluster <- factor(km_final$cluster)
+
+cat("Cluster sizes:\n")
+table(df_complete$cluster)
+```
+**Profile the clusters**
+
+```{r profile-clusters}
+df_complete %>%
+  group_by(cluster) %>%
+  summarise(
+    n = n(),
+    mean_balance = mean(balance_num),
+    mean_income = mean(income_num)
+  )
+```
+
+# Step 6: Visualize the Segments

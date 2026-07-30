@@ -634,3 +634,49 @@ cat("\nThe elbow method shows WSS improvement drops sharply after k=3-4",
 
     ## 
     ## The elbow method shows WSS improvement drops sharply after k=3-4 (from ~1,180 down to ~289), with only small, diminishing gains after that. k = 4 is selected: it sits at the elbow bend and produces segments that remain interpretable and actionable for marketing purposes.
+
+# Step 5: Fit the k-Means model
+
+**Fit the final model**
+
+``` r
+set.seed(42)
+final_k <- 4
+
+km_final <- kmeans(X_scaled, centers = final_k, nstart = 25)
+df_complete$cluster <- factor(km_final$cluster)
+
+cat("Cluster sizes:\n")
+```
+
+    ## Cluster sizes:
+
+``` r
+table(df_complete$cluster)
+```
+
+    ## 
+    ##   1   2   3   4 
+    ## 644 701 275 474
+
+**Profile the clusters**
+
+``` r
+df_complete %>%
+  group_by(cluster) %>%
+  summarise(
+    n = n(),
+    mean_balance = mean(balance_num),
+    mean_income = mean(income_num)
+  )
+```
+
+    ## # A tibble: 4 × 4
+    ##   cluster     n mean_balance mean_income
+    ##   <fct>   <int>        <dbl>       <dbl>
+    ## 1 1         644        1314.      27640.
+    ## 2 2         701        2086.      73413.
+    ## 3 3         275       10715.      88545.
+    ## 4 4         474        2368.     125000
+
+# Step 6: Visualize the Segments
